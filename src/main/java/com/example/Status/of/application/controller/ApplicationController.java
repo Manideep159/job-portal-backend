@@ -1,6 +1,7 @@
 package com.example.Status.of.application.controller;
 
 import com.example.Status.of.application.dto.ApplicationResponseDTO;
+import com.example.Status.of.application.dto.ApplyJobResponseDTO;
 import com.example.Status.of.application.entity.Application;
 import com.example.Status.of.application.entity.Job;
 import com.example.Status.of.application.mapper.ApplicationMapper;
@@ -63,6 +64,16 @@ public class ApplicationController {
                 file
         );
         return ResponseEntity.ok("Applied successfully");
+    }
+
+    @PostMapping("/jobId/{jobId}")
+    public ApplyJobResponseDTO apply(
+            @PathVariable Long jobId,
+            Authentication authentication
+    ) {
+        String mobile = authentication.getName();
+
+        return applicationService.applyJob(jobId, mobile);
     }
 
     // 🔐 Get My Applications

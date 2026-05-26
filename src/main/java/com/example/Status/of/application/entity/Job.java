@@ -37,6 +37,42 @@ public class Job {
 
     private String company;
 
+    private String sourceName;
+    private String sourceUrl;
+    private String externalJobId;
+    private Boolean externalJob;
+
+    public String getSourceUrl() {
+        return sourceUrl;
+    }
+
+    public void setSourceUrl(String sourceUrl) {
+        this.sourceUrl = sourceUrl;
+    }
+
+    public String getSourceName() {
+        return sourceName;
+    }
+
+    public void setSourceName(String sourceName) {
+        this.sourceName = sourceName;
+    }
+
+    public String getExternalJobId() {
+        return externalJobId;
+    }
+
+    public void setExternalJobId(String externalJobId) {
+        this.externalJobId = externalJobId;
+    }
+
+    public Boolean getExternalJob() {
+        return externalJob;
+    }
+
+    public void setExternalJob(Boolean externalJob) {
+        this.externalJob = externalJob;
+    }
 
     public void setTitle(String title) {
         this.title = title;
