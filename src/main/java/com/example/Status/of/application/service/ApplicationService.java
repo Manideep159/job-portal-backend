@@ -1,6 +1,5 @@
 package com.example.Status.of.application.service;
 
-import com.example.Status.of.application.dto.ApplyJobResponseDTO;
 import com.example.Status.of.application.entity.Application;
 import com.example.Status.of.application.entity.ApplicationStatus;
 import com.example.Status.of.application.entity.Job;
@@ -17,7 +16,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -125,32 +123,6 @@ public class ApplicationService {
         stats.put("REJECTED", applicationRepository.countByStatus(ApplicationStatus.REJECTED));
 
         return stats;
-    }
-
-    public ApplyJobResponseDTO applyJob(Long jobId, String mobile) {
-
-        Job job = jobRepository.findById(jobId)
-                .orElseThrow(() -> new RuntimeException("Job not found"));
-
-        boolean alreadyApplied =
-                applicationRepository.existsByJobIdAndUserMobile(jobId, mobile);
-
-        if (alreadyApplied) {
-            throw new RuntimeException("You already applied for this job");
-        }
-
-        Application application = new Application();
-        application.setJobId(jobId);
-        application.setUserMobile(mobile);
-        application.setStatus(ApplicationStatus.APPLIED);
-        application.setAppliedDate(LocalDate.now());
-
-        applicationRepository.save(application);
-
-        return new ApplyJobResponseDTO(
-                "Application saved successfully",
-                job.getApplyLink()
-        );
     }
 
     public List<Application> getUserApplications(String mobile) {
