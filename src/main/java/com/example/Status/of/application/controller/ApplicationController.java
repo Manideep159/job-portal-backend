@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -40,8 +39,7 @@ public class ApplicationController {
 //        return applicationService.applyJob(jobId, mobile);
 //    }
     @PostMapping("/{jobId}")
-    public ResponseEntity<?> apply(@PathVariable Long jobId, @RequestParam("resume") MultipartFile file,
-                                   Authentication authentication) throws Exception {
+    public ResponseEntity<?> apply(@PathVariable Long jobId, Authentication authentication) throws Exception {
 //        System.out.println("==== DEBUG START ====");
 //        System.out.println("TOKEN RECEIVED: " + authentication);
 //
@@ -55,13 +53,16 @@ public class ApplicationController {
 //        System.out.println("APPLICATION CREATED: " + app);
 //
 //        System.out.println("==== DEBUG END ====");
-        String mobile = authentication.getName();
+//        String mobile = authentication.getName();
 
-        applicationService.applyJob(
-                mobile,
-                jobId,
-                file
-        );
+//        applicationService.applyJob(
+//                jobId
+//
+//        );
+
+        String mobileNumber =
+                authentication.getName();
+        applicationService.applyJob(jobId, mobileNumber);
         return ResponseEntity.ok("Applied successfully");
     }
 

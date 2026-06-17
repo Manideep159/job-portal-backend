@@ -10,6 +10,8 @@ public class ProfileResponseDTO {
 
     private String email;
 
+    private String resumePath;
+
     private String location;
 
     private long totalApplications;
@@ -23,6 +25,7 @@ public class ProfileResponseDTO {
             String userName,
             String email,
             String location,
+            String resumePath,
             long totalApplications,
             long savedJobs
     ) {
@@ -31,6 +34,7 @@ public class ProfileResponseDTO {
         this.userName = userName;
         this.email = email;
         this.location = location;
+        this.resumePath = resumePath;
         this.totalApplications = totalApplications;
         this.savedJobs = savedJobs;
 

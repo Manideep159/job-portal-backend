@@ -10,6 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 @RestController
 @RequestMapping("/users")
@@ -29,28 +36,65 @@ public class UserController {
             Authentication authentication
     ) {
 
-        String mobile = authentication.getName();
+        String mobileNumber = authentication.getName();
 
         User user = userRepository
-                .findByMobileNumber(mobile)
+                .findByMobileNumber(mobileNumber)
                 .orElseThrow();
 
         long totalApplications =
-                applicationRepository
-                        .countByUserMobile(mobile);
+                applicationRepository.countByMobileNumber(mobileNumber);
+
 
         long savedJobs =
                 savedJobRepository
-                        .countByUserMobile(mobile);
+                        .countByUserMobile(mobileNumber);
 
         return new ProfileResponseDTO(
                 user.getMobileNumber(),
                 user.getRole(),
                 user.getName(),
                 user.getEmail(),
+                user.getResumePath(),
                 user.getLocation(),
                 totalApplications,
                 savedJobs
+        );
+    }
+
+    @PostMapping("/profile/upload-resume")
+    public ResponseEntity<?> uploadResume(
+            @RequestParam("resume") MultipartFile resume,
+            Authentication authentication
+    ) throws IOException {
+
+        User user =
+                userRepository.findByMobileNumber(
+                        authentication.getName()
+                ).orElseThrow();
+
+        String fileName =
+                System.currentTimeMillis()
+                        + "_"
+                        + resume.getOriginalFilename();
+
+        Path uploadPath =
+                Paths.get("uploads");
+
+        Files.createDirectories(uploadPath);
+
+        Files.copy(
+                resume.getInputStream(),
+                uploadPath.resolve(fileName),
+                StandardCopyOption.REPLACE_EXISTING
+        );
+
+        user.setResumePath(fileName);
+
+        userRepository.save(user);
+
+        return ResponseEntity.ok(
+                "Resume uploaded successfully"
         );
     }
 

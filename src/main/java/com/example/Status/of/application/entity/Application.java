@@ -20,7 +20,10 @@ public class Application {
 
     private Long jobId;
 
-    private String userMobile;
+    @ManyToOne
+    private User user;
+
+    private String mobileNumber;
 
     public String getResumeFileName() {
         return resumeFileName;
@@ -63,12 +66,20 @@ public class Application {
         this.jobId = jobId;
     }
 
-    public String getUserMobile() {
-        return userMobile;
+//    public String getUserMobile() {
+//        return userMobile;
+//    }
+//
+//    public void setUserMobile(String userMobile) {
+//        this.userMobile = userMobile;
+//    }
+
+    public String getMobileNumber() {
+        return mobileNumber;
     }
 
-    public void setUserMobile(String userMobile) {
-        this.userMobile = userMobile;
+    public void setMobileNumber(String mobileNumber) {
+        this.mobileNumber = mobileNumber;
     }
 
     public ApplicationStatus getStatus() {

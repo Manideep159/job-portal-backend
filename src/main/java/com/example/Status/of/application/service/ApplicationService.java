@@ -11,11 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +32,7 @@ public class ApplicationService {
     @Autowired
     private EmailService emailService;
 
+
     //    public Application applyJob(Long jobId, String userMobile) {
 //        boolean alreadyApplied = applicationRepository
 //                .existsByJobIdAndUserMobile(jobId, userMobile);
@@ -42,9 +40,8 @@ public class ApplicationService {
 //            throw new RuntimeException("You already applied for this job");
 //        }
     public void applyJob(
-            String userMobile,
             Long jobId,
-            MultipartFile file
+            String mobileNumber
     ) throws Exception {
 
         Job job = jobRepository
@@ -54,62 +51,41 @@ public class ApplicationService {
 
         boolean alreadyApplied =
                 applicationRepository
-                        .existsByJobIdAndUserMobile(
+                        .existsByJobIdAndMobileNumber(
                                 jobId,
-                                userMobile
+                                mobileNumber
                         );
 
         if (alreadyApplied) {
             throw new RuntimeException(
-                    "Already applied"
+                    "You already applied for this job"
             );
         }
-
-        String fileName =
-                System.currentTimeMillis()
-                        + "_"
-                        + file.getOriginalFilename();
-
-        Path uploadPath =
-                Paths.get("uploads");
-
-        if (!Files.exists(uploadPath)) {
-            Files.createDirectories(uploadPath);
-        }
-
-        Path filePath =
-                uploadPath.resolve(fileName);
-
-        Files.copy(
-                file.getInputStream(),
-                filePath
-        );
 
         Application application =
                 new Application();
 
-        application.setUserMobile(userMobile);
+        application.setJobId(jobId);
 
-        application.setJob(job);
-
-        application.setStatus(ApplicationStatus.valueOf("APPLIED"));
-
-        application.setResumeFileName(fileName);
-
-        application.setResumePath(
-                filePath.toString()
+        application.setMobileNumber(
+                mobileNumber
         );
 
-        applicationRepository.save(application);
+        application.setStatus(
+                ApplicationStatus.APPLIED
+        );
 
-//        Application app = new Application();
-//        app.setJobId(jobId);
-//        app.setUserMobile(userMobile);
-//        app.setStatus(ApplicationStatus.valueOf("APPLIED"));
-//        app.setAppliedDate(LocalDate.now());
-        System.out.println("APPLY API CALLED");
+        application.setAppliedDate(
+                LocalDate.now()
+        );
 
-//        applicationRepository.save(application);
+        applicationRepository.save(
+                application
+        );
+
+        System.out.println(
+                "APPLY API CALLED"
+        );
     }
 
     public Map<String, Long> getApplicationStats() {
@@ -125,8 +101,9 @@ public class ApplicationService {
         return stats;
     }
 
-    public List<Application> getUserApplications(String mobile) {
-        return applicationRepository.findByUserMobile(mobile);
+    public List<Application> getUserApplications(String mobileNumber) {
+//        return applicationRepository.findByUser_MobileNumber(mobileNumber);
+        return applicationRepository.findByMobileNumber(mobileNumber);
     }
 
 
@@ -143,7 +120,7 @@ public class ApplicationService {
 
         System.out.println("APPLICATION STATUS UPDATED");
 
-        User user = userRepository.findByMobileNumber(application.getUserMobile())
+        User user = userRepository.findByMobileNumber(application.getMobileNumber())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         System.out.println("USER EMAIL FOUND: " + user.getEmail());
@@ -171,12 +148,14 @@ public class ApplicationService {
         return applicationRepository.findAll();
     }
 
-    public List<Application> getByUser(String mobile) {
-        return applicationRepository.findByUserMobile(mobile);
+    public List<Application> getByUser(String mobileNumber) {
+//        return applicationRepository.findByUser_MobileNumber(mobileNumber);
+        return applicationRepository.findByMobileNumber(mobileNumber);
     }
 
-    public long countByUser(String mobile) {
-        return applicationRepository.countByUserMobile(mobile);
+    public long countByUser(String mobileNumber) {
+//        return applicationRepository.countByUser_MobileNumber(mobileNumber);
+        return applicationRepository.countByMobileNumber(mobileNumber);
     }
 
     @Value("${file.upload-dir}")

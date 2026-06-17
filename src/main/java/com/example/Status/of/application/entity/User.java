@@ -20,6 +20,9 @@ public class User {
     @Column(name = "mobile_number", unique = true)
     private String mobileNumber;
 
+    @Column(name = "resume_path")
+    private String resumePath;
+
     @Column(name = "user_name")
     private String name;
 
@@ -53,6 +56,14 @@ public class User {
 
     public void setLocation(String loaction) {
         this.location = loaction;
+    }
+
+    public void setResumePath(String resumePath) {
+        this.resumePath = resumePath;
+    }
+
+    public String getResumePath() {
+        return resumePath;
     }
 
     public Long getId() {

@@ -8,18 +8,27 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ApplicationRepository extends JpaRepository<Application, Long> {
+public interface ApplicationRepository
+        extends JpaRepository<Application, Long> {
 
-    List<Application> findByUserMobile(String userMobile);
+    Application findByJobId(
+            Long jobId
+    );
 
-    Application findByJobId(Long jobId);
+    long countByMobileNumber(
+            String mobileNumber
+    );
 
-//    boolean findByJobIdAndUserMobile(Long jobId, String userMobile);
+    long countByStatus(
+            ApplicationStatus status
+    );
 
-    boolean existsByJobIdAndUserMobile(Long jobId, String userMobile);
+    boolean existsByJobIdAndMobileNumber(
+            Long jobId,
+            String mobileNumber
+    );
 
-    long countByUserMobile(String userMobile);
-
-
-    long countByStatus(ApplicationStatus status);
+    List<Application> findByMobileNumber(
+            String mobileNumber
+    );
 }
