@@ -64,12 +64,12 @@ public class SecurityConfig {
         CorsConfiguration configuration =
                 new CorsConfiguration();
 
-        configuration.setAllowedOriginPatterns(
-                List.of(
+        configuration.setAllowedOrigins(
+                Arrays.asList(
                         "http://localhost:3000",
                         "https://job-portal-ui-indol.vercel.app"
-
                 )
+
         );
 
         configuration.setAllowedMethods(
