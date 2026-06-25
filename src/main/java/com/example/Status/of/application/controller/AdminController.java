@@ -16,6 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -73,6 +74,11 @@ public class AdminController {
 
         Path path =
                 Paths.get(app.getResumePath());
+
+        Path filePath = Paths.get("uploads", app.getResumeFileName());
+        System.out.println("FILE EXISTS = " + Files.exists(filePath));
+        System.out.println("PATH = " + filePath.toAbsolutePath());
+
 
         Resource resource =
                 new UrlResource(path.toUri());
