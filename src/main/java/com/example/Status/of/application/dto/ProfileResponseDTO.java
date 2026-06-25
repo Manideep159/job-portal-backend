@@ -10,6 +10,14 @@ public class ProfileResponseDTO {
 
     private String email;
 
+    public String getResumePath() {
+        return resumePath;
+    }
+
+    public void setResumePath(String resumePath) {
+        this.resumePath = resumePath;
+    }
+
     private String resumePath;
 
     private String location;
