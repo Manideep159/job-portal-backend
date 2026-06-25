@@ -10,14 +10,6 @@ public class ProfileResponseDTO {
 
     private String email;
 
-    public String getResumePath() {
-        return resumePath;
-    }
-
-    public void setResumePath(String resumePath) {
-        this.resumePath = resumePath;
-    }
-
     private String resumePath;
 
     private String location;
@@ -27,13 +19,21 @@ public class ProfileResponseDTO {
     private long savedJobs;
 
 
+    public String getResumePath() {
+        return resumePath;
+    }
+
+    public void setResumePath(String resumePath) {
+        this.resumePath = resumePath;
+    }
+
     public ProfileResponseDTO(
             String mobile,
             String role,
             String userName,
             String email,
-            String location,
             String resumePath,
+            String location,
             long totalApplications,
             long savedJobs
     ) {
@@ -41,8 +41,8 @@ public class ProfileResponseDTO {
         this.role = role;
         this.userName = userName;
         this.email = email;
-        this.location = location;
         this.resumePath = resumePath;
+        this.location = location;
         this.totalApplications = totalApplications;
         this.savedJobs = savedJobs;
 
