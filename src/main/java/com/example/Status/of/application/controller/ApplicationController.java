@@ -3,7 +3,10 @@ package com.example.Status.of.application.controller;
 import com.example.Status.of.application.dto.ApplicationResponseDTO;
 import com.example.Status.of.application.entity.Application;
 import com.example.Status.of.application.entity.Job;
+import com.example.Status.of.application.entity.User;
 import com.example.Status.of.application.mapper.ApplicationMapper;
+import com.example.Status.of.application.repository.JobRepository;
+import com.example.Status.of.application.repository.UserRepository;
 import com.example.Status.of.application.service.ApplicationService;
 import com.example.Status.of.application.service.JobService;
 import com.example.Status.of.application.util.JwtUtil;
@@ -28,6 +31,10 @@ public class ApplicationController {
     private JwtUtil jwtUtil;
     @Autowired
     private JobService jobService;
+    @Autowired
+    private JobRepository jobRepository;
+    @Autowired
+    private UserRepository userRepository;
 
 
     // 🔐 Apply Job
@@ -108,7 +115,17 @@ public class ApplicationController {
 
         return applicationService.getByUser(mobile)
                 .stream()
-                .map(ApplicationMapper::toDTO)
+                .map(app -> {
+
+                    Job job = jobRepository.findById(app.getJobId())
+                            .orElseThrow();
+
+                    User user = userRepository.findByMobileNumber(app.getMobileNumber())
+                            .orElseThrow();
+
+                    return ApplicationMapper.toDTO(app, user, job);
+
+                })
                 .toList();
     }
 }

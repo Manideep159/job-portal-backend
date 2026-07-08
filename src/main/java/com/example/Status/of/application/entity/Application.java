@@ -23,6 +23,9 @@ public class Application {
     @ManyToOne
     private User user;
 
+    @ManyToOne
+    private Job job;
+
     private String mobileNumber;
 
     public String getResumeFileName() {

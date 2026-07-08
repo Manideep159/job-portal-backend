@@ -3,8 +3,12 @@ package com.example.Status.of.application.controller;
 import com.example.Status.of.application.dto.ApplicationResponseDTO;
 import com.example.Status.of.application.entity.Application;
 import com.example.Status.of.application.entity.ApplicationStatus;
+import com.example.Status.of.application.entity.Job;
+import com.example.Status.of.application.entity.User;
 import com.example.Status.of.application.mapper.ApplicationMapper;
 import com.example.Status.of.application.repository.ApplicationRepository;
+import com.example.Status.of.application.repository.JobRepository;
+import com.example.Status.of.application.repository.UserRepository;
 import com.example.Status.of.application.service.ApplicationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -30,6 +34,11 @@ public class AdminController {
     private ApplicationService applicationService;
     @Autowired
     private ApplicationRepository applicationRepository;
+    @Autowired
+    private JobRepository jobRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     // 🔐 Admin: View all applications
     @GetMapping("/applications")
@@ -57,7 +66,12 @@ public class AdminController {
 //        System.out.println("STATUS: " + status);
 
         Application app = applicationService.updateStatus(id, status);
-        return ApplicationMapper.toDTO(app);
+        Job job = jobRepository.findById(app.getJobId())
+                .orElseThrow();
+
+        User user = userRepository.findByMobileNumber(app.getMobileNumber())
+                .orElseThrow();
+        return ApplicationMapper.toDTO(app, user, job);
     }
 
     @GetMapping("/applications/{id}/resume")
@@ -108,7 +122,14 @@ public class AdminController {
 
         return applicationService.getByUser(mobile)
                 .stream()
-                .map(ApplicationMapper::toDTO)
+                .map(app -> {
+                    Job job = jobRepository.findById(app.getJobId())
+                            .orElseThrow();
+
+                    User user = userRepository.findByMobileNumber(app.getMobileNumber())
+                            .orElseThrow();
+                    return ApplicationMapper.toDTO(app, user, job);
+                })
                 .toList();
     }
 
