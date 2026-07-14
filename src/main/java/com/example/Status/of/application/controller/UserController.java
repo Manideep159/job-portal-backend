@@ -1,5 +1,7 @@
 package com.example.Status.of.application.controller;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.example.Status.of.application.dto.ProfileResponseDTO;
 import com.example.Status.of.application.dto.UpdateProfileDTO;
 import com.example.Status.of.application.entity.User;
@@ -13,10 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
@@ -30,6 +29,9 @@ public class UserController {
 
     @Autowired
     private SavedJobRepository savedJobRepository;
+
+    @Autowired
+    private Cloudinary cloudinary;
 
     @GetMapping("/profile")
     public ProfileResponseDTO getProfile(
@@ -68,35 +70,81 @@ public class UserController {
             Authentication authentication
     ) throws IOException {
 
-        User user =
-                userRepository.findByMobileNumber(
-                        authentication.getName()
-                ).orElseThrow();
+        User user = userRepository
+                .findByMobileNumber(authentication.getName())
+                .orElseThrow();
 
-        String fileName =
-                System.currentTimeMillis()
-                        + "_"
-                        + resume.getOriginalFilename();
+        if (resume.isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body("Please select a file");
+        }
 
-        Path uploadPath =
-                Paths.get("uploads");
+        String originalName = resume.getOriginalFilename();
 
-        Files.createDirectories(uploadPath);
+        if (originalName == null ||
+                !(originalName.endsWith(".pdf")
+                        || originalName.endsWith(".doc")
+                        || originalName.endsWith(".docx"))) {
 
-        Files.copy(
-                resume.getInputStream(),
-                uploadPath.resolve(fileName),
-                StandardCopyOption.REPLACE_EXISTING
+            return ResponseEntity.badRequest()
+                    .body("Only PDF, DOC and DOCX files are allowed");
+        }
+
+        Map<?, ?> uploadResult = cloudinary.uploader().upload(
+                resume.getBytes(),
+                ObjectUtils.asMap(
+                        "resource_type", "raw",
+                        "folder", "jobportal/resumes",
+                        "public_id",
+                        System.currentTimeMillis() + "_" + originalName
+                )
         );
 
-        user.setResumePath(fileName);
+        String resumeUrl =
+                uploadResult.get("secure_url").toString();
+
+        user.setResumePath(resumeUrl);
 
         userRepository.save(user);
 
-        return ResponseEntity.ok(
-                "Resume uploaded successfully"
-        );
+        return ResponseEntity.ok(resumeUrl);
     }
+
+//    @PostMapping("/profile/upload-resume")
+//    public ResponseEntity<?> uploadResume(
+//            @RequestParam("resume") MultipartFile resume,
+//            Authentication authentication
+//    ) throws IOException {
+//
+//        User user =
+//                userRepository.findByMobileNumber(
+//                        authentication.getName()
+//                ).orElseThrow();
+//
+//        String fileName =
+//                System.currentTimeMillis()
+//                        + "_"
+//                        + resume.getOriginalFilename();
+//
+//        Path uploadPath =
+//                Paths.get("uploads");
+//
+//        Files.createDirectories(uploadPath);
+//
+//        Files.copy(
+//                resume.getInputStream(),
+//                uploadPath.resolve(fileName),
+//                StandardCopyOption.REPLACE_EXISTING
+//        );
+//
+//        user.setResumePath(fileName);
+//
+//        userRepository.save(user);
+//
+//        return ResponseEntity.ok(
+//                "Resume uploaded successfully"
+//        );
+//    }
 
     @PutMapping("/profile")
     public ResponseEntity<?> updateProfile(
