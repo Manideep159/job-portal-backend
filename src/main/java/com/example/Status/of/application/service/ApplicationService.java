@@ -49,6 +49,14 @@ public class ApplicationService {
                 .orElseThrow(() ->
                         new RuntimeException("Job not found"));
 
+        Application application = new Application();
+
+        application.setJob(job);
+        application.setJobId(job.getJobId());
+        application.setMobileNumber(mobileNumber);
+        application.setAppliedDate(LocalDate.now());
+        application.setStatus(ApplicationStatus.APPLIED);
+
         boolean alreadyApplied =
                 applicationRepository
                         .existsByJobIdAndMobileNumber(
@@ -62,26 +70,28 @@ public class ApplicationService {
             );
         }
 
-        Application application =
-                new Application();
+        applicationRepository.save(application);
 
-        application.setJobId(jobId);
-
-        application.setMobileNumber(
-                mobileNumber
-        );
-
-        application.setStatus(
-                ApplicationStatus.APPLIED
-        );
-
-        application.setAppliedDate(
-                LocalDate.now()
-        );
-
-        applicationRepository.save(
-                application
-        );
+//        Application application =
+//                new Application();
+//
+//        application.setJobId(jobId);
+//
+//        application.setMobileNumber(
+//                mobileNumber
+//        );
+//
+//        application.setStatus(
+//                ApplicationStatus.APPLIED
+//        );
+//
+//        application.setAppliedDate(
+//                LocalDate.now()
+//        );
+//
+//        applicationRepository.save(
+//                application
+//        );
 
         System.out.println(
                 "APPLY API CALLED"

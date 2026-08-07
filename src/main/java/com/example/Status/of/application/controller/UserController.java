@@ -89,16 +89,24 @@ public class UserController {
             return ResponseEntity.badRequest()
                     .body("Only PDF, DOC and DOCX files are allowed");
         }
-
         Map<?, ?> uploadResult = cloudinary.uploader().upload(
-                resume.getBytes(),
+                resume.getInputStream(),
                 ObjectUtils.asMap(
                         "resource_type", "raw",
                         "folder", "jobportal/resumes",
-                        "public_id",
-                        System.currentTimeMillis() + "_" + originalName
+                        "use_filename", true,
+                        "unique_filename", true
                 )
         );
+//        Map<?, ?> uploadResult = cloudinary.uploader().upload(
+//                resume.getBytes(),
+//                ObjectUtils.asMap(
+//                        "resource_type", "raw",
+//                        "folder", "jobportal/resumes",
+//                        "public_id",
+//                        System.currentTimeMillis() + "_" + originalName
+//                )
+//        );
 
         String resumeUrl =
                 uploadResult.get("secure_url").toString();

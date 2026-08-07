@@ -8,6 +8,12 @@ import com.example.Status.of.application.entity.User;
 public class ApplicationMapper {
 
     public static ApplicationResponseDTO toDTO(Application app, User user, Job job) {
+//        Job job = app.getJob();
+
+        String title = job != null ? job.getTitle() : "";
+        String company = job != null ? job.getCompany() : "";
+        String location = job != null ? job.getLocation() : "";
+        
         return new ApplicationResponseDTO(
 //                app.getId(),
 //                app.getJobId(),

@@ -103,6 +103,11 @@ public class Application {
 
 
     public void setJob(Job job) {
+        this.job = job;
 
+    }
+
+    public Job getJob() {
+        return job;
     }
 }
