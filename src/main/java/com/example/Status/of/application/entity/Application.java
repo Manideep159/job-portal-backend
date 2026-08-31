@@ -18,12 +18,18 @@ public class Application {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "job_id")
     private Long jobId;
 
     @ManyToOne
     private User user;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "job_id",
+            insertable = false,
+            updatable = false
+    )
     private Job job;
 
     private String mobileNumber;

@@ -7,27 +7,39 @@ import com.example.Status.of.application.entity.User;
 
 public class ApplicationMapper {
 
-    public static ApplicationResponseDTO toDTO(Application app, User user, Job job) {
-//        Job job = app.getJob();
+    public static ApplicationResponseDTO toDTO(
+            Application app,
+            User user,
+            Job job
+    ) {
 
         String title = job != null ? job.getTitle() : "";
         String company = job != null ? job.getCompany() : "";
         String location = job != null ? job.getLocation() : "";
-        
+
+        String resumePath =
+                user != null ? user.getResumePath() : null;
+
+        String appliedDate =
+                app.getAppliedDate() != null
+                        ? app.getAppliedDate().toString()
+                        : "";
+
+        String status =
+                app.getStatus() != null
+                        ? app.getStatus().name()
+                        : "";
+
         return new ApplicationResponseDTO(
-//                app.getId(),
-//                app.getJobId(),
-//                app.getStatus().name(),
-//                app.getAppliedDate().toString()
                 app.getId(),
                 app.getJobId(),
-                app.getJob().getTitle(),
-                app.getJob().getCompany(),
-                app.getJob().getLocation(),
+                title,
+                company,
+                location,
                 app.getMobileNumber(),
-                app.getUser().getResumePath(),
-                app.getStatus().name(),
-                app.getAppliedDate().toString()
+                resumePath,
+                status,
+                appliedDate
         );
     }
 }

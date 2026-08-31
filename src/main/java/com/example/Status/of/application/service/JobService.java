@@ -24,6 +24,7 @@ public class JobService {
     @Autowired
     private ApplicationRepository applicationRepository;
 
+
     @Autowired
     private SavedJobRepository savedJobRepository;
 
