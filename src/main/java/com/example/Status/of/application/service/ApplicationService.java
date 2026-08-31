@@ -140,11 +140,16 @@ public class ApplicationService {
 
         System.out.println("JOB FOUND: " + job.getTitle());
 
-        emailService.sendApplicationStatusEmail(
-                user.getEmail(),
-                status.name(),
-                job.getTitle()
-        );
+
+        try {
+            emailService.sendApplicationStatusEmail(
+                    user.getEmail(),
+                    status.name(),
+                    job.getTitle()
+            );
+        } catch (Exception e) {
+            System.err.println("EMAIL SENT FAILED " + e.getMessage());
+        }
 
         return savedApplication;
     }
