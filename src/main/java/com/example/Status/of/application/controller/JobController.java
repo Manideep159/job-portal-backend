@@ -5,6 +5,7 @@ import com.example.Status.of.application.dto.JobResponseDTO;
 import com.example.Status.of.application.entity.Job;
 import com.example.Status.of.application.entity.JobType;
 import com.example.Status.of.application.mapper.JobMapper;
+import com.example.Status.of.application.repository.JobRepository;
 import com.example.Status.of.application.service.JobService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -20,6 +22,9 @@ public class JobController {
 
     @Autowired
     private JobService jobService;
+
+    @Autowired
+    private JobRepository jobRepository;
 
     // 🔐 Protected API (JWT required)
     @PostMapping("/create")
@@ -36,11 +41,17 @@ public class JobController {
 
     @GetMapping("/all")
     public List<JobResponseDTO> getAllJobs() {
-        return jobService.getAllJobs()
+        return jobRepository.findAllByOrderByCreatedAtDesc()
                 .stream()
                 .map(JobMapper::toDTO)
                 .toList();
     }
+//    public List<JobResponseDTO> getAllJobs() {
+//        return .getAllJobs()
+//                .stream()
+//                .map(JobMapper::toDTO)
+//                .toList();
+//    }
 
     @GetMapping("/filter")
     public List<Job> filterJobs(
@@ -48,6 +59,18 @@ public class JobController {
             @RequestParam(required = false) JobType type) {
 
         return jobService.filterJobs(location, type);
+    }
+
+    @GetMapping("/latest")
+    public List<Job> getLatestJobs() {
+
+        LocalDateTime yesterday =
+                LocalDateTime.now().minusHours(24);
+
+        return jobRepository
+                .findByCreatedAtAfterOrderByCreatedAtDesc(
+                        yesterday
+                );
     }
 
     @GetMapping("/saved")

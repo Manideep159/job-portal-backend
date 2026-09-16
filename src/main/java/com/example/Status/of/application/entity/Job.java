@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 
 @Data
@@ -66,6 +67,12 @@ public class Job {
         this.lastDate = lastDate;
     }
 
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @Column(name = "external_job_id", unique = true)
+    private String externalJobId;
+
     @Enumerated(EnumType.STRING)
     private JobType type;
     private String location;
@@ -78,3 +85,5 @@ public class Job {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate lastDate;
 }
+
+

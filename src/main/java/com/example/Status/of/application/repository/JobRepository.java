@@ -7,7 +7,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface JobRepository extends JpaRepository<Job, Long> {
@@ -22,4 +24,14 @@ public interface JobRepository extends JpaRepository<Job, Long> {
     List<Job> findByLocationAndType(String location, JobType type);
 
     List<Job> findByLocation(String location);
+
+    List<Job> findAllByOrderByCreatedAtDesc();
+
+    Optional<Job> findByExternalJobId(String externalJobId);
+
+    List<Job> findByCreatedAtAfterOrderByCreatedAtDesc(
+            LocalDateTime date
+    );
+
+
 }

@@ -1,0 +1,116 @@
+package com.example.Status.of.application.service;
+
+import com.example.Status.of.application.dto.AdzunaJobDTO;
+import com.example.Status.of.application.dto.AdzunaResponseDTO;
+import com.example.Status.of.application.entity.Job;
+import com.example.Status.of.application.entity.JobType;
+import com.example.Status.of.application.repository.JobRepository;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Service
+public class JobAutomationService {
+
+    private final AdzunaService adzunaService;
+    private final JobRepository jobRepository;
+
+    public JobAutomationService(
+            AdzunaService adzunaService,
+            JobRepository jobRepository) {
+
+        this.adzunaService = adzunaService;
+        this.jobRepository = jobRepository;
+    }
+
+    public void fetchAndSaveJobs() {
+
+        List<String> keywords = List.of(
+                "Java Developer",
+                "Software Engineer",
+                "Backend Developer"
+        );
+        for (String keyword : keywords) {
+
+            try {
+                System.out.println("\"Fetching jobs for: " + keyword);
+
+                AdzunaResponseDTO response =
+                        adzunaService.fetchJobs(keyword);
+
+                if (response == null ||
+                        response.getResults() == null) {
+
+                    continue;
+                }
+
+                for (AdzunaJobDTO apiJob :
+                        response.getResults()) {
+
+                    saveIfNew(apiJob);
+                }
+
+            } catch (Exception e) {
+
+                System.err.println(
+                        "Failed to fetch jobs for "
+                                + keyword
+                );
+
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void saveIfNew(AdzunaJobDTO apiJob) {
+
+        String externalId =
+                "adzuna-" + apiJob.getId();
+
+        if (jobRepository.findByExternalJobId(externalId).isPresent()) {
+
+            System.out.println("Job already exists: " + externalId);
+
+            return;
+        }
+
+        Job job = new Job();
+
+        job.setExternalJobId(externalId);
+
+        job.setTitle(apiJob.getTitle());
+
+        job.setDescription(apiJob.getDescription());
+
+        job.setApplyLink(apiJob.getRedirectUrl());
+
+        job.setType(JobType.valueOf("PRIVATE"));
+
+        job.setCreatedAt(LocalDateTime.now());
+
+        if (apiJob.getCompany() != null && apiJob.getCompany().getDisplayName() != null) {
+
+            job.setCompany(apiJob.getCompany().getDisplayName());
+
+        } else {
+            job.setCompany("Company not specified");
+        }
+
+        if (apiJob.getLocation() != null && apiJob.getLocation().getDisplayName() != null) {
+
+            job.setLocation(apiJob.getLocation().getDisplayName());
+
+        } else {
+            job.setLocation("Location not specified");
+        }
+
+        jobRepository.save(job);
+
+        System.out.println(
+                "New job saved: "
+                        + job.getTitle()
+        );
+    }
+}
+

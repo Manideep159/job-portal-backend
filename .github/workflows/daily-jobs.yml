@@ -1,0 +1,20 @@
+name: Daily Job Fetch
+
+on:
+  schedule:
+    - cron: '17 6 * * *'
+      timezone: 'Asia/Kolkata'
+
+  workflow_dispatch:
+
+jobs:
+  fetch-jobs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger job fetch
+        run: |
+          curl --fail-with-body \
+          -X POST \
+          "${{ secrets.JOB_API_URL }}/admin/jobs/fetch" \
+          -H "X-Automation-Key: ${{ secrets.JOB_AUTOMATION_SECRET }}"
