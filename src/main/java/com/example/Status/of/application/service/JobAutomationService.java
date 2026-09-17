@@ -85,25 +85,36 @@ public class JobAutomationService {
 
         job.setApplyLink(apiJob.getRedirectUrl());
 
+//        job.setCompany(String.valueOf(apiJob.getCompany()));
+
         job.setType(JobType.valueOf("PRIVATE"));
 
         job.setCreatedAt(LocalDateTime.now());
 
-        if (apiJob.getCompany() != null && apiJob.getCompany().getDisplayName() != null) {
+        if (apiJob.getCompany() != null
+                && apiJob.getCompany().getDisplayName() != null
+                && !apiJob.getCompany().getDisplayName().isBlank()) {
 
             job.setCompany(apiJob.getCompany().getDisplayName());
 
         } else {
+
             job.setCompany("Company not specified");
+
         }
 
-        if (apiJob.getLocation() != null && apiJob.getLocation().getDisplayName() != null) {
+        if (apiJob.getLocation() != null
+                && apiJob.getLocation().getDisplayName() != null
+                && !apiJob.getLocation().getDisplayName().isBlank()) {
 
             job.setLocation(apiJob.getLocation().getDisplayName());
 
         } else {
+
             job.setLocation("Location not specified");
         }
+
+        job.setLastDate(null);
 
         jobRepository.save(job);
 
