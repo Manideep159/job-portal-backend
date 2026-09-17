@@ -49,8 +49,13 @@ public class SecurityConfig {
                         .requestMatchers("/uploads/**").permitAll()
                         .requestMatchers("/applications/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/users/**").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
+
+                        // GitHub Actions job automation endpoint
                         .requestMatchers("/admin/jobs/fetch").permitAll()
+
+                        // Other admin endpoints still require ADMIN
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()
