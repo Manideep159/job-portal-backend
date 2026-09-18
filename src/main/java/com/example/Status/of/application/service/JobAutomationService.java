@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class JobAutomationService {
@@ -91,16 +93,34 @@ public class JobAutomationService {
 
         job.setCreatedAt(LocalDateTime.now());
 
+
+        String companyName = null;
         if (apiJob.getCompany() != null
                 && apiJob.getCompany().getDisplayName() != null
                 && !apiJob.getCompany().getDisplayName().isBlank()) {
 
-            job.setCompany(apiJob.getCompany().getDisplayName());
+//            job.setCompany(apiJob.getCompany().getDisplayName());
+            companyName = apiJob.getCompany().getDisplayName();
 
-        } else {
+        }
+        if (companyName == null && apiJob.getDescription() != null) {
 
-            job.setCompany("Company not specified");
+            String description = apiJob.getDescription();
 
+            Pattern pattern = Pattern.compile(
+                    "(?i)job is with\\s+([A-Za-z0-9&.,'\\- ]+?)(?:,|\\s+an inclusive employer|\\s+–)"
+            );
+
+            Matcher matcher = pattern.matcher(description);
+
+            if (matcher.find()) {
+                companyName = matcher.group(1).trim();
+            }
+            if (companyName == null || companyName.isBlank()) {
+                companyName = "Company not specified";
+            }
+
+            job.setCompany(companyName);
         }
 
         if (apiJob.getLocation() != null
