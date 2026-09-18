@@ -67,13 +67,11 @@ public class JobAutomationService {
 
     private void saveIfNew(AdzunaJobDTO apiJob) {
 
-        String externalId =
-                "adzuna-" + apiJob.getId();
+        String externalId = "adzuna-" + apiJob.getId();
 
+        // Prevent duplicate jobs
         if (jobRepository.findByExternalJobId(externalId).isPresent()) {
-
             System.out.println("Job already exists: " + externalId);
-
             return;
         }
 
@@ -87,23 +85,31 @@ public class JobAutomationService {
 
         job.setApplyLink(apiJob.getRedirectUrl());
 
-//        job.setCompany(String.valueOf(apiJob.getCompany()));
+        job.setType(JobType.PRIVATE);
 
-        job.setType(JobType.valueOf("PRIVATE"));
-
+        // This is when OUR application imported the job.
+        // We will use this for the NEW badge.
         job.setCreatedAt(LocalDateTime.now());
 
 
+        // =====================================================
+        // COMPANY
+        // =====================================================
+
         String companyName = null;
+
+        // 1. First try Adzuna's structured company field
         if (apiJob.getCompany() != null
                 && apiJob.getCompany().getDisplayName() != null
                 && !apiJob.getCompany().getDisplayName().isBlank()) {
 
-//            job.setCompany(apiJob.getCompany().getDisplayName());
             companyName = apiJob.getCompany().getDisplayName();
-
         }
-        if (companyName == null && apiJob.getDescription() != null) {
+
+        // 2. If Adzuna company is missing,
+        //    try extracting it from the description
+        if ((companyName == null || companyName.isBlank())
+                && apiJob.getDescription() != null) {
 
             String description = apiJob.getDescription();
 
@@ -116,12 +122,21 @@ public class JobAutomationService {
             if (matcher.find()) {
                 companyName = matcher.group(1).trim();
             }
-            if (companyName == null || companyName.isBlank()) {
-                companyName = "Company not specified";
-            }
-
-            job.setCompany(companyName);
         }
+
+        // 3. Final fallback
+        if (companyName == null || companyName.isBlank()) {
+            companyName = "Company not specified";
+        }
+
+        // IMPORTANT:
+        // Set company OUTSIDE the previous if blocks
+        job.setCompany(companyName);
+
+
+        // =====================================================
+        // LOCATION
+        // =====================================================
 
         if (apiJob.getLocation() != null
                 && apiJob.getLocation().getDisplayName() != null
@@ -134,13 +149,29 @@ public class JobAutomationService {
             job.setLocation("Location not specified");
         }
 
+
+        // =====================================================
+        // LAST DATE
+        // =====================================================
+
+        // Adzuna search API does not provide an application
+        // deadline for this job.
         job.setLastDate(null);
+
+
+        // =====================================================
+        // SAVE
+        // =====================================================
 
         jobRepository.save(job);
 
         System.out.println(
                 "New job saved: "
                         + job.getTitle()
+                        + " | Company: "
+                        + job.getCompany()
+                        + " | Location: "
+                        + job.getLocation()
         );
     }
 }
