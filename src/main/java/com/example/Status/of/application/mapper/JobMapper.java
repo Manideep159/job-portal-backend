@@ -27,7 +27,8 @@ public class JobMapper {
                 job.getTitle(),
                 job.getCompany(),
                 job.getType().name(),
-                job.getLocation()
+                job.getLocation(),
+                job.getCreatedAt()
         );
     }
 }
