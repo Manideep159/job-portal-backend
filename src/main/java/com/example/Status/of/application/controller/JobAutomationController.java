@@ -2,6 +2,7 @@ package com.example.Status.of.application.controller;
 
 import com.example.Status.of.application.service.GovernmentJobService;
 import com.example.Status.of.application.service.JobAutomationService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -16,7 +17,7 @@ public class JobAutomationController {
 
     private final GovernmentJobService governmentJobService;
 
-    //    @Value("${job.automation.secret}")
+    @Value("${job.automation.secret}")
     private String automationSecret;
 
 

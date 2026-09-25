@@ -101,9 +101,10 @@ public class JobController {
     @GetMapping("/page")
     public Page<JobResponseDTO> getJobs(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size) {
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(required = false) JobType type) {
 
-        return jobService.getJobs(page, size)
+        return jobService.getJobs(page, size, type)
                 .map(JobMapper::toDTO);
     }
 //

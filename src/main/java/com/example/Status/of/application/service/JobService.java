@@ -98,13 +98,17 @@ public class JobService {
         return jobRepository.findByJobId(id);
     }
 
-    public Page<Job> getJobs(int page, int size) {
-        return jobRepository.findAll(
-                PageRequest.of(
-                        page,
-                        size,
-                        Sort.by(Sort.Direction.DESC, "createdAt")
-                )
+    public Page<Job> getJobs(int page, int size, JobType type) {
+        PageRequest pageRequest = PageRequest.of(
+                page,
+                size,
+                Sort.by(Sort.Direction.DESC, "createdAt")
         );
+
+        if (type == null) {
+            return jobRepository.findAll(pageRequest);
+        }
+
+        return jobRepository.findByType(type, pageRequest);
     }
 }
