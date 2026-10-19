@@ -1,15 +1,15 @@
 package com.example.Status.of.application.service;
 
-import com.example.Status.of.application.entity.Application;
-import com.example.Status.of.application.entity.ApplicationStatus;
-import com.example.Status.of.application.entity.Job;
-import com.example.Status.of.application.entity.User;
+import com.example.Status.of.application.entity.*;
 import com.example.Status.of.application.repository.ApplicationRepository;
+import com.example.Status.of.application.repository.ApplicationStatusHistoryRepository;
 import com.example.Status.of.application.repository.JobRepository;
 import com.example.Status.of.application.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -31,6 +31,10 @@ public class ApplicationService {
     private UserRepository userRepository;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private ApplicationStatusHistoryRepository historyRepository;
+    @Autowired
+    private ApplicationStatusHistory applicationStatusHistory;
 
 
     //    public Application applyJob(Long jobId, String userMobile) {
@@ -116,30 +120,62 @@ public class ApplicationService {
         return applicationRepository.findByMobileNumber(mobileNumber);
     }
 
+    @Transactional
 
     public Application updateStatus(Long id, ApplicationStatus status) {
 
         System.out.println("UPDATE STATUS METHOD CALLED");
 
         Application application = applicationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Application not found"));
+                .orElseThrow(() ->
+                        new RuntimeException("Application not found"));
 
+        // STEP 1: Capture the previous status BEFORE updating it
+        ApplicationStatus previousStatus = application.getStatus();
+
+        // STEP 2: Update and save the application
         application.setStatus(status);
 
-        Application savedApplication = applicationRepository.save(application);
+        Application savedApplication =
+                applicationRepository.save(application);
 
         System.out.println("APPLICATION STATUS UPDATED");
 
-        User user = userRepository.findByMobileNumber(application.getMobileNumber())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        // STEP 3: Save application status history
+        ApplicationStatusHistory history =
+                new ApplicationStatusHistory();
+
+        history.setApplicationId(savedApplication.getId());
+
+        history.setPreviousStatus(
+                previousStatus == null ? null : previousStatus.name()
+        );
+
+        history.setNewStatus(status.name());
+
+        String admin = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        history.setChangedBy(admin);
+
+        historyRepository.save(history);
+
+        System.out.println("APPLICATION STATUS HISTORY SAVED");
+
+        // STEP 4: Keep your existing email notification logic
+        User user = userRepository.findByMobileNumber(
+                        application.getMobileNumber())
+                .orElseThrow(() ->
+                        new RuntimeException("User not found"));
 
         System.out.println("USER EMAIL FOUND: " + user.getEmail());
 
         Job job = jobRepository.findById(application.getJobId())
-                .orElseThrow(() -> new RuntimeException("Job not found"));
+                .orElseThrow(() ->
+                        new RuntimeException("Job not found"));
 
         System.out.println("JOB FOUND: " + job.getTitle());
-
 
         try {
             emailService.sendApplicationStatusEmail(
@@ -148,11 +184,49 @@ public class ApplicationService {
                     job.getTitle()
             );
         } catch (Exception e) {
-            System.err.println("EMAIL SENT FAILED " + e.getMessage());
+            System.err.println(
+                    "EMAIL SENT FAILED: " + e.getMessage());
         }
 
         return savedApplication;
     }
+
+//    public Application updateStatus(Long id, ApplicationStatus status) {
+//
+//        System.out.println("UPDATE STATUS METHOD CALLED");
+//
+//        Application application = applicationRepository.findById(id)
+//                .orElseThrow(() -> new RuntimeException("Application not found"));
+//
+//        application.setStatus(status);
+//
+//        Application savedApplication = applicationRepository.save(application);
+//
+//        System.out.println("APPLICATION STATUS UPDATED");
+//
+//        User user = userRepository.findByMobileNumber(application.getMobileNumber())
+//                .orElseThrow(() -> new RuntimeException("User not found"));
+//
+//        System.out.println("USER EMAIL FOUND: " + user.getEmail());
+//
+//        Job job = jobRepository.findById(application.getJobId())
+//                .orElseThrow(() -> new RuntimeException("Job not found"));
+//
+//        System.out.println("JOB FOUND: " + job.getTitle());
+//
+//
+//        try {
+//            emailService.sendApplicationStatusEmail(
+//                    user.getEmail(),
+//                    status.name(),
+//                    job.getTitle()
+//            );
+//        } catch (Exception e) {
+//            System.err.println("EMAIL SENT FAILED " + e.getMessage());
+//        }
+//
+//        return savedApplication;
+//    }
 
     public Application getById(Long id) {
         return applicationRepository.findById(id)
