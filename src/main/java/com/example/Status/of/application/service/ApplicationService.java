@@ -33,8 +33,6 @@ public class ApplicationService {
     private EmailService emailService;
     @Autowired
     private ApplicationStatusHistoryRepository historyRepository;
-    @Autowired
-    private ApplicationStatusHistory applicationStatusHistory;
 
 
     //    public Application applyJob(Long jobId, String userMobile) {
