@@ -1,13 +1,21 @@
 package com.example.Status.of.application.service;
 
+import com.resend.Resend;
+import com.resend.core.exception.ResendException;
+import com.resend.services.emails.model.CreateEmailOptions;
+import com.resend.services.emails.model.CreateEmailResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
 
 @Service
 public class EmailService {
+    @Value("${resend.api-key}")
+    private String apiKey;
+
+    @Value("${resend.from}")
+    private String from;
 
     @Autowired
     private JavaMailSender mailSender;
@@ -23,37 +31,63 @@ public class EmailService {
         System.out.println("Job title:" + jobTitle);
 
         try {
-            SimpleMailMessage message =
-                    new SimpleMailMessage();
+            Resend resend = new Resend(apiKey);
 
-            message.setTo(to);
+            CreateEmailOptions params =
+                    CreateEmailOptions.builder()
+                            .from(from)
+                            .to(to)
+                            .subject("Job Application Status Update")
+                            .text(
+                                    "Your application for " + jobTitle
+                                            + " is now " + status + "."
+                            )
+                            .build();
 
-            message.setSubject(
-                    "Job Application Status Update"
+            CreateEmailResponse response =
+                    resend.emails().send(params);
+
+            System.out.println(
+                    "EMAIL SUBMITTED TO RESEND: " + response.getId()
             );
 
-            message.setText(
-                    "Your application for "
-                            + jobTitle
-                            + " is now "
-                            + status
+        } catch (ResendException e) {
+            System.err.println(
+                    "RESEND EMAIL FAILED: " + e.getMessage()
             );
-            
-            if (mailSender instanceof JavaMailSenderImpl sender) {
-                System.out.println("SMTP HOST: " + sender.getHost());
-                System.out.println("SMTP PORT: " + sender.getPort());
-                System.out.println("SMTP USERNAME CONFIGURED: "
-                        + (sender.getUsername() != null
-                        && !sender.getUsername().isBlank()));
-            }
-
-            mailSender.send(message);
-            System.out.println("EMAIL SENT SUCCESSFULLY");
-
-        } catch (Exception e) {
-            System.out.println("EMAIL SENT FAILED:" + e.getMessage());
-            e.printStackTrace();
-
         }
     }
+//            SimpleMailMessage message =
+//                    new SimpleMailMessage();
+//
+//            message.setTo(to);
+//
+//            message.setSubject(
+//                    "Job Application Status Update"
+//            );
+//
+//            message.setText(
+//                    "Your application for "
+//                            + jobTitle
+//                            + " is now "
+//                            + status
+//            );
+//
+//            if (mailSender instanceof JavaMailSenderImpl sender) {
+//                System.out.println("SMTP HOST: " + sender.getHost());
+//                System.out.println("SMTP PORT: " + sender.getPort());
+//                System.out.println("SMTP USERNAME CONFIGURED: "
+//                        + (sender.getUsername() != null
+//                        && !sender.getUsername().isBlank()));
+//            }
+//
+//            mailSender.send(message);
+//            System.out.println("EMAIL SENT SUCCESSFULLY");
+//
+//        } catch (Exception e) {
+//            System.out.println("EMAIL SENT FAILED:" + e.getMessage());
+//            e.printStackTrace();
+//
+//        }
+//    }
 }
